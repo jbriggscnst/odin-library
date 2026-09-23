@@ -17,25 +17,26 @@ function Book(title, author, pages, read) {
 function addBookToLibrary(title, author, pages, read) {
     const book = new Book(title, author, pages, read);
     myLibrary.push(book);
+
+    displayLibrary(myLibrary);
 }
 
 function displayLibrary(myLibrary) {
     const library = document.querySelector(".library");
+
+    library.innerHTML= "";
+
     for (let book of myLibrary) {
         const bookCard = document.createElement("div");
         bookCard.classList.add("book-card");
-        const bookTitle = document.createElement("h2")
-        bookTitle.textContent = book.title;
-        const bookAuthor = document.createElement("p");
-        bookAuthor.textContent = book.author;
-        const bookPages = document.createElement("p");
-        bookPages.textContent = book.pages;
-        const bookRead = document.createElement("p");
-        bookRead.textContent = book.read;
-        bookCard.appendChild(bookTitle);
-        bookCard.appendChild(bookAuthor);
-        bookCard.appendChild(bookPages);
-        bookCard.appendChild(bookRead);
+
+        bookCard.innerHTML = `
+            <h2>${book.title}</h2>
+            <p>${book.author}</p>
+            <p>${book.pages} pages</p>
+            <p>${book.read ? "Read" : "Not read"}</p>
+        `;
+
         library.appendChild(bookCard);
     }
 }
@@ -51,5 +52,20 @@ const bookForm = document.querySelector("#book-form");
 newBookBtn.addEventListener("click", () => {
     bookForm.hidden = false;
 });
+
+bookForm.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const bookData = new FormData(event.target);
+
+    const title = bookData.get("title");
+    const author = bookData.get("author");
+    // currently receiving a string from this, Number() if needed
+    const pages = bookData.get("pages");
+    // could turn into boolean with === "read"
+    const read = bookData.get("readStatus")
+
+    addBookToLibrary(title, author, pages, read);
+})
 
 displayLibrary(myLibrary);

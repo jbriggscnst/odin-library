@@ -6,12 +6,16 @@ function Book(title, author, pages, read) {
     this.title = title;
     this.author = author;
     this.pages = pages;
-    this.read = read;
+    this.read = read ;
     this.id = crypto.randomUUID();
 
     this.info = function() {
         return `The ${title} by ${author}, ${pages}, ${read}.`;
     };
+}
+
+Book.prototype.toggleReadStatus = function() {
+    this.read = !this.read;
 }
 
 function addBookToLibrary(title, author, pages, read) {
@@ -29,25 +33,27 @@ function displayLibrary(myLibrary) {
     for (let book of myLibrary) {
         const bookCard = document.createElement("div");
         bookCard.classList.add("book-card");
+        bookCard.dataset.id = book.id;
 
         bookCard.innerHTML = `
             <h2>${book.title}</h2>
             <p>${book.author}</p>
             <p>${book.pages} pages</p>
-            <p>${book.read ? "Read" : "Not read"}</p>
+            <p>${book.read ? "Have read" : "Unread"}</p> <button class="read-status-btn">Have you read this?</button>
+            <button class="rm-book-btn">Remove from Library</button>
         `;
-
         library.appendChild(bookCard);
     }
 }
 
 const myLibrary = []
-addBookToLibrary("The Hobbit", "Tolkien", "295 pages", "not read yet");
-addBookToLibrary("1984", "George Orwell", "368 pages", "not read yet");
-addBookToLibrary("The Very Hungry Caterpillar", "Eric Carle", "32 pages", "Have read")
+addBookToLibrary("The Hobbit", "Tolkien", "295 pages", false);
+addBookToLibrary("1984", "George Orwell", "368 pages", false);
+addBookToLibrary("The Very Hungry Caterpillar", "Eric Carle", "32 pages", true)
 
 const newBookBtn = document.querySelector("#new-book-btn");
 const bookForm = document.querySelector("#book-form");
+const libraryContainer = document.querySelector(".library");
 
 newBookBtn.addEventListener("click", () => {
     bookForm.hidden = false;
@@ -62,10 +68,29 @@ bookForm.addEventListener("submit", function(event) {
     const author = bookData.get("author");
     // currently receiving a string from this, Number() if needed
     const pages = bookData.get("pages");
-    // could turn into boolean with === "read"
-    const read = bookData.get("readStatus")
+    const read = bookData.get("readStatus") === "Have read"
 
     addBookToLibrary(title, author, pages, read);
 })
+
+libraryContainer.addEventListener("click", (event) => {
+    const cardButton = event.target.closest("button")
+    if (!cardButton) return;
+
+    const bookCard = cardButton.closest(".book-card");
+    const index = myLibrary.findIndex(
+        (book) => book.id === bookCard.dataset.id
+    );
+
+    if (cardButton.matches(".rm-book-btn")) {
+        myLibrary.splice(index, 1);
+        displayLibrary(myLibrary);
+
+    } else if (cardButton.matches(".read-status-btn")) {
+        myLibrary[index].toggleReadStatus();
+        displayLibrary(myLibrary);
+    }
+
+});
 
 displayLibrary(myLibrary);
